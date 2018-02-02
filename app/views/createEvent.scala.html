@@ -1,0 +1,29 @@
+@import play.api.data.Form
+@import play.api.i18n.Messages
+@import play.api.mvc.RequestHeader
+@import org.webjars.play.WebJarsUtil
+@import forms.CreateEventForm.Data
+@import b3.inline.fieldConstructor
+
+@(createEventForm: Form[Data], user: models.User)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+
+@main(messages("event.create")) {
+    <fieldset class="col-md-6 col-md-offset-3">
+        <legend>@messages("event.create")</legend>
+        @helper.form(action = controllers.routes.CreateEventController.submit()) {
+            @helper.CSRF.formField
+            @b3.text(createEventForm("name"), '_hiddenLabel -> messages("event.name"), 'placeholder -> messages("event.name"), 'class -> "form-control input-lg")
+            @b3.select(createEventForm("category"), Seq(("Conferencia", "Conferencia"), ("Seminario", "Seminario"), ("Congreso", "Congreso"), ("Curso", "Curso")), '_hiddenLabel -> messages("event.category"), 'placeholder -> messages("event.category"), 'class -> "form-control input-lg")
+            @b3.text(createEventForm("place"), '_hiddenLabel -> messages("event.location"), 'placeholder -> messages("event.location"), 'class -> "form-control input-lg")
+            @b3.text(createEventForm("address"), '_hiddenLabel -> messages("event.address"), 'placeholder -> messages("event.address"), 'class -> "form-control input-lg")
+            @b3.date(createEventForm("startDate"), '_hiddenLabel -> messages("event.start.date"), 'placeholder -> messages("event.start.date"), 'class -> "form-control input-lg")
+            @b3.date(createEventForm("endDate"), '_hiddenLabel -> messages("event.end.date"), 'placeholder -> messages("event.end.date"), 'class -> "form-control input-lg")
+            @b3.select(createEventForm("type"), Seq(("Virtual", "Virtual"), ("Presencial", "Presencial")), '_hiddenLabel -> messages("event.type"), 'placeholder -> messages("event.type"), 'class -> "form-control input-lg")
+            <div class="form-group">
+                <div>
+                    <button id="submit" type="submit" value="submit" class="btn btn-lg btn-primary btn-block">@messages("event.create")</button>
+                </div>
+            </div>
+        }
+    </fieldset>
+}

@@ -1,0 +1,29 @@
+@import play.api.data.Form
+@import play.api.i18n.Messages
+@import play.api.mvc.RequestHeader
+@import org.webjars.play.WebJarsUtil
+@import forms.ModifyEventForm.Data
+@import b3.inline.fieldConstructor
+
+@(modifyEventForm: Form[Data], user: models.User, event: models.Event)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+
+@main(messages("event.modify"), Some(user), Some(event)) {
+    <fieldset class="col-md-6 col-md-offset-3">
+        <legend>@messages("event.modify")</legend>
+        @helper.form(action = controllers.routes.ModifyEventController.submit(event.eventID)) {
+            @helper.CSRF.formField
+            @b3.text(modifyEventForm("name"), '_hiddenLabel -> messages("first.name"), 'placeholder -> messages("first.name"), 'class -> "form-control input-lg")
+            @b3.select(modifyEventForm("category"), Seq(("Conferencia", "Conferencia"), ("Seminario", "Seminario"), ("Congreso", "Congreso"), ("Curso", "Curso")), '_hiddenLabel -> messages("last.name"), 'placeholder -> messages("last.name"), 'class -> "form-control input-lg")
+            @b3.text(modifyEventForm("place"), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")
+            @b3.text(modifyEventForm("address"), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")
+            @b3.date(modifyEventForm("startDate"), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")
+            @b3.date(modifyEventForm("endDate"), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")
+            @b3.select(modifyEventForm("type"), Seq(("true", "Virtual"), ("false", "Presencial")), '_hiddenLabel -> messages("email"), 'placeholder -> messages("email"), 'class -> "form-control input-lg")
+            <div class="form-group">
+                <div>
+                    <button id="submit" type="submit" value="submit" class="btn btn-lg btn-primary btn-block">@messages("modify")</button>
+                </div>
+            </div>
+        }
+    </fieldset>
+}

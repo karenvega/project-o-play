@@ -1,0 +1,40 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                                controllers.ApplicationController.index
+GET         /signOut                         controllers.ApplicationController.signOut
+GET         /authenticate/:provider          controllers.SocialAuthController.authenticate(provider)
+
+GET         /signUp                          controllers.SignUpController.view
+POST        /signUp                          controllers.SignUpController.submit
+
+GET         /createEvent                     controllers.CreateEventController.view
+POST        /createEvent                     controllers.CreateEventController.submit
+
+GET         /listEvent                       controllers.ListEventController.view
+
+GET         /detail/:uuid                    controllers.ListEventController.detail(uuid: java.util.UUID)
+
+GET         /modify/:uuid                    controllers.ModifyEventController.view(uuid: java.util.UUID)
+POST        /modify/:uuid                    controllers.ModifyEventController.submit(uuid: java.util.UUID)
+GET         /delete/:uuid                    controllers.ListEventController.delete(uuid: java.util.UUID)
+
+
+GET         /signIn                          controllers.SignInController.view
+POST        /signIn                          controllers.SignInController.submit
+
+GET         /password/forgot                 controllers.ForgotPasswordController.view
+POST        /password/forgot                 controllers.ForgotPasswordController.submit
+GET         /password/reset/:token           controllers.ResetPasswordController.view(token: java.util.UUID)
+POST        /password/reset/:token           controllers.ResetPasswordController.submit(token: java.util.UUID)
+GET         /password/change                 controllers.ChangePasswordController.view
+POST        /password/change                 controllers.ChangePasswordController.submit
+
+GET         /account/email/:email            controllers.ActivateAccountController.send(email: String)
+GET         /account/activate/:token         controllers.ActivateAccountController.activate(token: java.util.UUID)
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                    controllers.Assets.at(path="/public", file)
+->          /webjars                         webjars.Routes

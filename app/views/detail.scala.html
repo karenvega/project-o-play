@@ -1,0 +1,35 @@
+@import play.api.i18n.Messages
+@import play.api.mvc.RequestHeader
+@import org.webjars.play.WebJarsUtil
+
+@(event: Option[models.Event])(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+
+@main2(messages("home.title"), Nil, event) {
+    <div class="user col-md-6 col-md-offset-3">
+        <div class="row data">
+            <div class="col-md-12">
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("first.name"):</strong></p><p class="col-md-6">@event.get.name.getOrElse("None")</p>
+                </div>
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("last.name"):</strong></p><p class="col-md-6">@event.get.category.getOrElse("None")</p>
+                </div>
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("full.name"):</strong></p><p class="col-md-6">@event.get.location.getOrElse("None")</p>
+                </div>
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.address.getOrElse("None")</p>
+                </div>
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.startDate.getOrElse("None")</p>
+                </div>
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.endDate.getOrElse("None")</p>
+                </div>
+                <div class="row">
+                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.isVirtual</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
