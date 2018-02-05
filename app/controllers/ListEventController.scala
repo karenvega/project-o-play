@@ -73,7 +73,7 @@ class ListEventController @Inject() (
     } yield {
       event
     }
-    event.map(e => Ok(views.html.detail(e)))
+    event.map(e => Ok(views.html.detail(e, request.identity)))
   }
 
   /**

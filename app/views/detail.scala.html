@@ -2,32 +2,37 @@
 @import play.api.mvc.RequestHeader
 @import org.webjars.play.WebJarsUtil
 
-@(event: Option[models.Event])(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+@(event: Option[models.Event], user: models.User)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
 
-@main2(messages("home.title"), Nil, event) {
+@main2(messages("home.title"), Some(user), Nil, event) {
     <div class="user col-md-6 col-md-offset-3">
         <div class="row data">
             <div class="col-md-12">
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("first.name"):</strong></p><p class="col-md-6">@event.get.name.getOrElse("None")</p>
+                    <p class="col-md-6"><strong>@messages("event.name"):</strong></p><p class="col-md-6">@event.get.name.getOrElse("None")</p>
                 </div>
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("last.name"):</strong></p><p class="col-md-6">@event.get.category.getOrElse("None")</p>
+                    <p class="col-md-6"><strong>@messages("event.category"):</strong></p><p class="col-md-6">@event.get.category.getOrElse("None")</p>
                 </div>
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("full.name"):</strong></p><p class="col-md-6">@event.get.location.getOrElse("None")</p>
+                    <p class="col-md-6"><strong>@messages("event.location"):</strong></p><p class="col-md-6">@event.get.location.getOrElse("None")</p>
                 </div>
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.address.getOrElse("None")</p>
+                    <p class="col-md-6"><strong>@messages("event.address"):</strong></p><p class="col-md-6">@event.get.address.getOrElse("None")</p>
                 </div>
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.startDate.getOrElse("None")</p>
+                    <p class="col-md-6"><strong>@messages("event.start.date"):</strong></p><p class="col-md-6">@event.get.startDate.getOrElse("None")</p>
                 </div>
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.endDate.getOrElse("None")</p>
+                    <p class="col-md-6"><strong>@messages("event.end.date"):</strong></p><p class="col-md-6">@event.get.endDate.getOrElse("None")</p>
                 </div>
                 <div class="row">
-                    <p class="col-md-6"><strong>@messages("email"):</strong></p><p class="col-md-6">@event.get.isVirtual</p>
+                    <p class="col-md-6"><strong>@messages("event.type"):</strong></p>@if(event == Option(true)) { <p class="col-md-6"> Virtual</p> } else {  <p class="col-md-6"> Presencial</p> }
+                </div>
+                <div class="row">
+                    <form action="@controllers.routes.ListEventController.view()">
+                        <input type="submit" value="Regresar" />
+                    </form>
                 </div>
             </div>
         </div>

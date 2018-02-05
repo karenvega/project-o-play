@@ -3,7 +3,7 @@
 @import play.twirl.api.Html
 @import org.webjars.play.WebJarsUtil
 
-@(title: String, events: List[models.Event] = Nil, event: Option[models.Event] = None)(content: Html)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
+@(title: String, user: Option[models.User] = None, events: List[models.Event] = Nil, event: Option[models.Event] = None)(content: Html)(implicit request: RequestHeader, messages: Messages, webJarsUtil: WebJarsUtil)
 
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +25,32 @@
             <![endif]-->
     </head>
     <body>
+        <header class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">@messages("toggle.navigation")</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="@controllers.routes.ListEventController.view">ABC</a>
+                </div>
+                <nav class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="@controllers.routes.ListEventController.view()">@messages("home")</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                    @user.map { u =>
+                    <li><a href="@controllers.routes.ApplicationController.signOut">@messages("sign.out")</a></li>
+                    }.getOrElse {
+                        <li><a href="@controllers.routes.SignInController.view">@messages("sign.in")</a></li>
+                        <li><a href="@controllers.routes.SignUpController.view">@messages("sign.up")</a></li>
+                    }
+                    </ul>
+                </nav>
+            </div>
+        </header>
         <main class="container">
             <div class="starter-template row">
                 @request.flash.get("error").map { msg =>

@@ -67,7 +67,7 @@ class SignInController @Inject() (
       data => {
         val credentials = Credentials(data.email, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-          val result = Redirect(routes.ApplicationController.index())
+          val result = Redirect(routes.ListEventController.view())
           userService.retrieve(loginInfo).flatMap {
             case Some(user) if !user.activated =>
               Future.successful(Ok(views.html.activateAccount(data.email)))
@@ -107,7 +107,7 @@ class SignInController @Inject() (
       form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
       data => {
         //val credentials = Credentials(data.email, data.password)
-        val result = Redirect(routes.ApplicationController.index())
+        val result = Redirect(routes.ListEventController.view())
         val session: Future[Option[PasswordInfo]] = for {
           cc <- userService.getPassword(data.email)
         } yield {
@@ -118,7 +118,7 @@ class SignInController @Inject() (
         val loginInfo = LoginInfo("credentials", data.email)
         val credentials = Credentials(data.email, data.password)
         credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-          val result = Redirect(routes.ApplicationController.index())
+          val result = Redirect(routes.ListEventController.view())
           userService.retrieve(loginInfo).flatMap {
             case Some(user) =>
               val c = configuration.underlying
@@ -156,7 +156,7 @@ class SignInController @Inject() (
       form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
       data => {
         //val credentials = Credentials(data.email, data.password)
-        val result = Redirect(routes.ApplicationController.index())
+        val result = Redirect(routes.ListEventController.view())
         val session: Future[Option[PasswordInfo]] = for {
           cc <- userService.getPassword(data.email)
         } yield {
