@@ -4,9 +4,9 @@ import java.util.UUID
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.services.IdentityService
-import com.mohiva.play.silhouette.api.util.PasswordInfo
+import com.mohiva.play.silhouette.api.util.{ Credentials, PasswordInfo }
 import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import models.User
+import models.{ AuthToken, User }
 
 import scala.concurrent.Future
 
@@ -18,10 +18,18 @@ trait UserService extends IdentityService[User] {
   /**
    * Retrieves a user that matches the specified ID.
    *
-   * @param id The ID to retrieve a user.
+   * @param email The ID to retrieve a user.
    * @return The retrieved user or None if no user could be retrieved for the given ID.
    */
-  def retrieve(id: UUID): Future[Option[User]]
+  def retrieve(email: String): Future[Option[User]]
+
+  /**
+   * Retrieves a user that matches the specified ID.
+   *
+   * @param credentials The ID to retrieve a user.
+   * @return The retrieved user or None if no user could be retrieved for the given ID.
+   */
+  def retrieveSession(credentials: Credentials): Future[LoginInfo]
 
   /**
    * Saves a user.
@@ -31,7 +39,7 @@ trait UserService extends IdentityService[User] {
    */
   def save(user: User): Future[User]
 
-  def savePassword(login: LoginInfo, aut: PasswordInfo): Future[PasswordInfo]
+  def savePassword(login: LoginInfo, aut: PasswordInfo, aut1: AuthToken): Future[PasswordInfo]
 
   def getPassword(email: String): Future[Option[PasswordInfo]]
 }

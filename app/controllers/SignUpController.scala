@@ -9,12 +9,11 @@ import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{ PasswordHasherRegistry, PasswordInfo }
 import com.mohiva.play.silhouette.impl.providers._
 import forms.SignUpForm
-import infrastructure.cassandra.UsersRepository
 import models.User
 import models.services.{ AuthTokenService, UserService }
 import org.webjars.play.WebJarsUtil
 import play.api.i18n.{ I18nSupport, Messages }
-import play.api.libs.mailer.{ Email, MailerClient }
+import play.api.libs.mailer.MailerClient
 import play.api.mvc.{ AbstractController, AnyContent, ControllerComponents, Request }
 import utils.auth.DefaultEnv
 
@@ -67,12 +66,12 @@ class SignUpController @Inject() (
     SignUpForm.form.bindFromRequest.fold(
       form => Future.successful(BadRequest(views.html.signUp(form))),
       data => {
-        val result = Redirect(routes.ListEventController.view())
+        val result = Redirect(routes.SignInController.view()).flashing("info" -> Messages("account.created", ""))
+        val badResult = Redirect(routes.SignUpController.view()).flashing("error" -> Messages("email.duplicated", ""))
         val loginInfo = LoginInfo(CredentialsProvider.ID, data.email)
-        userService.retrieve(loginInfo).flatMap {
+        userService.retrieve(loginInfo.providerKey).flatMap {
           case Some(user) =>
-            val url = routes.SignInController.view().absoluteURL()
-            Future.successful(result)
+            Future.successful(badResult)
           case None =>
             val authInfo: PasswordInfo = passwordHasherRegistry.current.hash(data.password)
             val user = User(
@@ -82,15 +81,14 @@ class SignUpController @Inject() (
               lastName = Some(data.lastName),
               fullName = Some(data.firstName + " " + data.lastName),
               email = Some(data.email),
-              avatarURL = None,
+              password = Some(data.password),
               activated = true
             )
             for {
-              avatar <- avatarService.retrieveURL(data.email)
-              user <- userService.save(user.copy(avatarURL = avatar))
+              user <- userService.save(user)
               authInfo <- authInfoRepository.add(loginInfo, authInfo)
-              _ <- userService.savePassword(loginInfo, authInfo)
               authToken <- authTokenService.create(user.userID)
+              _ <- userService.savePassword(loginInfo, authInfo, authToken)
             } yield {
               silhouette.env.eventBus.publish(SignUpEvent(user, request))
               result

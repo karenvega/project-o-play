@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.PasswordHasherRegistry
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import forms.{ ChangePasswordForm, CreateEventForm }
+import forms.CreateEventForm
 import models.Event
 import models.services.{ AuthTokenService, EventService, UserService }
 import org.webjars.play.WebJarsUtil
@@ -74,7 +74,7 @@ class CreateEventController @Inject() (
           val result = Redirect(routes.ListEventController.view()).flashing("info" -> Messages("event.created", ""))
           val event = Event(
             eventID = UUID.randomUUID(),
-            userEmail = "karenya11@hotmail.com", //TODO Change this
+            userEmail = request.identity.email.getOrElse("karenya11@hotmail.com"),
             name = Some(data.name),
             address = Some(data.address),
             category = Some(data.category),

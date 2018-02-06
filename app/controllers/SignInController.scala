@@ -57,44 +57,15 @@ class SignInController @Inject() (
   }
 
   /**
-   * Handles the submitted form.
+   * Views the `Sign In` page.
    *
    * @return The result to display.
    */
   def submit1 = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    SignInForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
-      data => {
-        val credentials = Credentials(data.email, data.password)
-        credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
-          val result = Redirect(routes.ListEventController.view())
-          userService.retrieve(loginInfo).flatMap {
-            case Some(user) if !user.activated =>
-              Future.successful(Ok(views.html.activateAccount(data.email)))
-            case Some(user) =>
-              val c = configuration.underlying
-              silhouette.env.authenticatorService.create(loginInfo).map {
-                case authenticator if data.rememberMe =>
-                  authenticator.copy(
-                    expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
-                    idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                    cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
-                  )
-                case authenticator => authenticator
-              }.flatMap { authenticator =>
-                silhouette.env.eventBus.publish(LoginEvent(user, request))
-                silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                  silhouette.env.authenticatorService.embed(v, result)
-                }
-              }
-            case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
-          }
-        }.recover {
-          case _: ProviderException =>
-            Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
-        }
-      }
-    )
+    {
+      println("karen alo hace aqui")
+      Future.successful(Ok(views.html.signIn(SignInForm.form, socialProviderRegistry)))
+    }
   }
 
   /**
@@ -104,22 +75,15 @@ class SignInController @Inject() (
    */
   def submit = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
     SignInForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
+      form => {
+        Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry)).flashing("error" -> Messages("invalid.credentials", "")))
+      },
       data => {
-        //val credentials = Credentials(data.email, data.password)
-        val result = Redirect(routes.ListEventController.view())
-        val session: Future[Option[PasswordInfo]] = for {
-          cc <- userService.getPassword(data.email)
-        } yield {
-          cc
-        }
-        val authInfo: PasswordInfo = passwordHasherRegistry.current.hash(data.password)
-        println(authInfo + " ----infooo")
         val loginInfo = LoginInfo("credentials", data.email)
         val credentials = Credentials(data.email, data.password)
-        credentialsProvider.authenticate(credentials).flatMap { loginInfo =>
+        userService.retrieveSession(credentials).flatMap { loginInfo =>
           val result = Redirect(routes.ListEventController.view())
-          userService.retrieve(loginInfo).flatMap {
+          userService.retrieve(loginInfo.providerKey).flatMap {
             case Some(user) =>
               val c = configuration.underlying
               silhouette.env.authenticatorService.create(loginInfo).map {
@@ -138,57 +102,6 @@ class SignInController @Inject() (
               }
             case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
           }
-        }
-      }.recover {
-        case _: ProviderException =>
-          Redirect(routes.SignInController.view()).flashing("error" -> Messages("invalid.credentials"))
-      }
-    )
-  }
-
-  /**
-   * Handles the submitted form.
-   *
-   * @return The result to display.
-   */
-  def submit2 = silhouette.UnsecuredAction.async { implicit request: Request[AnyContent] =>
-    SignInForm.form.bindFromRequest.fold(
-      form => Future.successful(BadRequest(views.html.signIn(form, socialProviderRegistry))),
-      data => {
-        //val credentials = Credentials(data.email, data.password)
-        val result = Redirect(routes.ListEventController.view())
-        val session: Future[Option[PasswordInfo]] = for {
-          cc <- userService.getPassword(data.email)
-        } yield {
-          cc
-        }
-        val authInfo: PasswordInfo = passwordHasherRegistry.current.hash(data.password)
-        println(authInfo + " ----infooo")
-        val loginInfo = LoginInfo("credentials", data.email)
-        session.flatMap {
-          case Some(user) if user.password.equals(authInfo.password) => {
-            userService.retrieve(loginInfo).flatMap {
-              case Some(user) =>
-                val c = configuration.underlying
-                silhouette.env.authenticatorService.create(loginInfo).map {
-                  case authenticator if data.rememberMe =>
-                    authenticator.copy(
-                      expirationDateTime = clock.now + c.as[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorExpiry"),
-                      idleTimeout = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.authenticatorIdleTimeout"),
-                      cookieMaxAge = c.getAs[FiniteDuration]("silhouette.authenticator.rememberMe.cookieMaxAge")
-                    )
-                  case authenticator => authenticator
-                }.flatMap { authenticator =>
-                  silhouette.env.eventBus.publish(LoginEvent(user, request))
-                  silhouette.env.authenticatorService.init(authenticator).flatMap { v =>
-                    silhouette.env.authenticatorService.embed(v, result)
-                  }
-                }
-              case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
-            }
-          }
-          case Some(user) if !user.password.equals(data.password) => Future.failed(new ProviderException(msg = "invalid.credentials"))
-          case None => Future.failed(new IdentityNotFoundException("Couldn't find user"))
         }
       }.recover {
         case _: ProviderException =>

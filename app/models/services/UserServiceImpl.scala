@@ -4,8 +4,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import com.mohiva.play.silhouette.api.util.PasswordInfo
-import models.User
+import com.mohiva.play.silhouette.api.util.{ Credentials, PasswordInfo }
+import models.{ AuthToken, User }
 import models.daos.UserDAO
 import play.api.db.Database
 
@@ -22,14 +22,14 @@ class UserServiceImpl @Inject() (userDAO: UserDAO, db: Database)(implicit ex: Ex
   /**
    * Retrieves a user that matches the specified ID.
    *
-   * @param id The ID to retrieve a user.
+   * @param email The ID to retrieve a user.
    * @return The retrieved user or None if no user could be retrieved for the given ID.
    */
-  def retrieve(id: UUID) = {
+  def retrieve(email: String) = {
     val conn = db.getConnection()
     try {
       val stmt = conn.createStatement
-      val rs = stmt.executeQuery(s"SELECT * from users when userID = '$id' ")
+      val rs = stmt.executeQuery(s"SELECT * from users where email = '$email' ")
       if (rs.next()) {
         val id = rs.getString("userID")
         val name = rs.getString("firstName")
@@ -47,6 +47,25 @@ class UserServiceImpl @Inject() (userDAO: UserDAO, db: Database)(implicit ex: Ex
       conn.close()
     }
 
+  }
+
+  def retrieveSession(credentials: Credentials): Future[LoginInfo] = {
+    println("karen" + credentials + "...aaaaaaaaaaaaaa")
+    val conn = db.getConnection()
+    try {
+      val stmt = conn.createStatement
+      val rs = stmt.executeQuery(s"SELECT * from users where email = '${credentials.identifier}' and password = '${credentials.password}' ")
+      if (rs.next()) {
+
+        val providerId = rs.getString("providerId")
+        val providerKey = rs.getString("providerKey")
+        Future.successful(LoginInfo(providerId, providerKey))
+      } else {
+        Future.successful(LoginInfo("credentials", ""))
+      }
+    } finally {
+      conn.close()
+    }
   }
 
   /**
@@ -87,15 +106,17 @@ class UserServiceImpl @Inject() (userDAO: UserDAO, db: Database)(implicit ex: Ex
   def save(user: User) = {
     val conn = db.getConnection()
     try {
-      conn.prepareStatement(s"INSERT INTO users(userID, firstName, lastName, fullName, email, activated, providerID, providerKey) " +
-        s"values ( '${user.userID}', '${user.firstName.get}', '${user.lastName.get}', '${user.fullName.get}', '${user.email.get}', 'true', '${user.loginInfo.providerID}', '${user.loginInfo.providerKey}' )").execute()
+      conn.prepareStatement(s"INSERT INTO users(userID, firstName, lastName, fullName, email, activated, providerID, providerKey, password) " +
+        s"values ( '${user.userID}', '${user.firstName.get}', '${user.lastName.get}', " +
+        s"'${user.fullName.get}', '${user.email.get}', 'true', '${user.loginInfo.providerID}', " +
+        s"'${user.loginInfo.providerKey}', '${user.password.get}' )").execute()
       Future.successful(user)
     } finally {
       conn.close()
     }
   }
 
-  def savePassword(login: LoginInfo, aut: PasswordInfo) = {
+  def savePassword(login: LoginInfo, aut: PasswordInfo, aut1: AuthToken) = {
     val conn = db.getConnection()
     try {
       conn.prepareStatement(s"INSERT INTO Login (email, hasher, password, salt) " +

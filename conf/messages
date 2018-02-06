@@ -116,5 +116,9 @@ event.end.date = End Date
 event.type = Type
 
 event.created = The event was created successfully
-modify = Modificar
-back = Atras
+event.modified = The event was modified successfully
+
+modify = Modify
+account.created = Account created
+email.duplicated = This account is already registered
+back = Back

@@ -88,7 +88,7 @@ class ModifyEventController @Inject() (
         ModifyEventForm.form.bindFromRequest.fold(
           form => event.map(e => BadRequest(views.html.modifyEvent(form, request.identity, e.get))),
           data => {
-            val result = Redirect(routes.ListEventController.view()).flashing("info" -> Messages("sign.up.email.sent", ""))
+            val result = Redirect(routes.ListEventController.view())
             val event = Event(
               eventID = uUID,
               userEmail = request.identity.email.toString,
