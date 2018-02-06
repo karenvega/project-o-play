@@ -59,7 +59,7 @@ class EventServiceImpl @Inject() (eventDAO: EventDAO, db: Database)(implicit ex:
     try {
       val stmt = conn.createStatement
       val allEvents: mutable.MutableList[Event] = mutable.MutableList.empty
-      val rs = stmt.executeQuery(s"SELECT * from events where userEmail = '$userEmail' ")
+      val rs = stmt.executeQuery(s"SELECT * from events where userEmail = '$userEmail' order by timestamp desc ")
       while (rs.next()) {
         val id = rs.getString("eventID")
         val userEmail = rs.getString("userEmail")
@@ -85,10 +85,14 @@ class EventServiceImpl @Inject() (eventDAO: EventDAO, db: Database)(implicit ex:
    * @return The saved event.
    */
   def save(event: Event) = {
+    val timestamp = System.currentTimeMillis / 1000
     val conn = db.getConnection()
     try {
-      conn.prepareStatement(s"INSERT INTO events(eventID, userEmail, name, category, location, address, startDate, endDate, isVirtual) " +
-        s"values ( '${event.eventID}', '${event.userEmail}', '${event.name.get}', '${event.category.get}', '${event.location.get}', '${event.address.get}', '${event.startDate.get}', '${event.endDate.get}', '${event.isVirtual}' )").execute()
+      conn.prepareStatement(s"INSERT INTO events(eventID, userEmail, name, category, location, address, " +
+        s"startDate, endDate, isVirtual, timestamp) " +
+        s"values ( '${event.eventID}', '${event.userEmail}', '${event.name.get}', '${event.category.get}'," +
+        s" '${event.location.get}', '${event.address.get}', '${event.startDate.get}', '${event.endDate.get}', " +
+        s"'${event.isVirtual}', $timestamp )").execute()
       Future.successful(event)
     } finally {
       conn.close()
